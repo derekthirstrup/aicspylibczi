@@ -43,7 +43,7 @@ jobs:
       - name: Build wheel
         run: |
           uv venv --python="$PYTHON_VERSION" .venv
-          uv pip install --python .venv/bin/python build setuptools wheel cmake numpy
+          uv pip install --python .venv/bin/python build setuptools wheel cmake
           .venv/bin/python -m build --wheel --outdir dist
 
       - name: Smoke test wheel (isolated)
@@ -58,6 +58,7 @@ jobs:
         with:
           name: aicspylibczi-linux-${{ matrix.tag }}-wheel
           path: dist/*.whl
+          if-no-files-found: error
 
   build-windows:
     name: Build Windows x64 ${{ matrix.tag }} wheel
@@ -89,7 +90,7 @@ jobs:
         shell: pwsh
         run: |
           uv venv --python="$env:PYTHON_VERSION" .venv
-          uv pip install --python .venv\Scripts\python.exe build setuptools wheel cmake numpy
+          uv pip install --python .venv\Scripts\python.exe build setuptools wheel cmake
           .venv\Scripts\python.exe -m build --wheel --outdir dist
 
       - name: Smoke test wheel (isolated)
@@ -107,6 +108,7 @@ jobs:
         with:
           name: aicspylibczi-windows-${{ matrix.tag }}-wheel
           path: dist/*.whl
+          if-no-files-found: error
 
   build-macos:
     name: Build macOS arm64 ${{ matrix.tag }} wheel
@@ -140,7 +142,7 @@ jobs:
       - name: Build wheel
         run: |
           uv venv --python="$PYTHON_VERSION" .venv
-          uv pip install --python .venv/bin/python build setuptools wheel cmake numpy
+          uv pip install --python .venv/bin/python build setuptools wheel cmake
           .venv/bin/python -m build --wheel --outdir dist
 
       - name: Smoke test wheel (isolated)
@@ -155,3 +157,4 @@ jobs:
         with:
           name: aicspylibczi-macos-${{ matrix.tag }}-wheel
           path: dist/*.whl
+          if-no-files-found: error
