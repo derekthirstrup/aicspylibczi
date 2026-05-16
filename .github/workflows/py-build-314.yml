@@ -5,15 +5,22 @@ on:
 
 permissions: {}
 
-env:
-  PYTHON_VERSION: "cpython-3.14"
-
 jobs:
   build-linux:
-    name: Build Linux x86_64 wheel
+    name: Build Linux x86_64 ${{ matrix.tag }} wheel
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - python: "cpython-3.14"
+            tag: "cp314"
+          - python: "cpython-3.14t"
+            tag: "cp314t"
+    env:
+      PYTHON_VERSION: ${{ matrix.python }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -39,14 +46,24 @@ jobs:
       - name: Upload wheel artifact
         uses: actions/upload-artifact@v4
         with:
-          name: aicspylibczi-linux-cp314-wheel
+          name: aicspylibczi-linux-${{ matrix.tag }}-wheel
           path: dist/*.whl
 
   build-windows:
-    name: Build Windows x64 wheel
+    name: Build Windows x64 ${{ matrix.tag }} wheel
     runs-on: windows-latest
     permissions:
       contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - python: "cpython-3.14"
+            tag: "cp314"
+          - python: "cpython-3.14t"
+            tag: "cp314t"
+    env:
+      PYTHON_VERSION: ${{ matrix.python }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -68,14 +85,24 @@ jobs:
       - name: Upload wheel artifact
         uses: actions/upload-artifact@v4
         with:
-          name: aicspylibczi-windows-cp314-wheel
+          name: aicspylibczi-windows-${{ matrix.tag }}-wheel
           path: dist/*.whl
 
   build-macos:
-    name: Build macOS arm64 wheel
+    name: Build macOS arm64 ${{ matrix.tag }} wheel
     runs-on: macos-latest
     permissions:
       contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - python: "cpython-3.14"
+            tag: "cp314"
+          - python: "cpython-3.14t"
+            tag: "cp314t"
+    env:
+      PYTHON_VERSION: ${{ matrix.python }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -99,5 +126,5 @@ jobs:
       - name: Upload wheel artifact
         uses: actions/upload-artifact@v4
         with:
-          name: aicspylibczi-macos-cp314-wheel
+          name: aicspylibczi-macos-${{ matrix.tag }}-wheel
           path: dist/*.whl
