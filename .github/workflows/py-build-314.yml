@@ -1,0 +1,44 @@
+name: Python 3.14 Wheels
+
+on:
+  push:
+    branches:
+      - claude/add-py314-wheel-action-bk4kb
+  workflow_dispatch:
+
+jobs:
+  build_wheels_py314:
+    name: Build cp314 wheel on ${{ matrix.cibw-arch }}
+    runs-on: ${{ matrix.runs-on }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runs-on: ubuntu-latest
+            cibw-arch: manylinux_x86_64
+          - runs-on: macos-13
+            cibw-arch: macosx_x86_64
+          - runs-on: macos-latest
+            cibw-arch: macosx_arm64
+          - runs-on: windows-latest
+            cibw-arch: win_amd64
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - uses: pypa/cibuildwheel@v3.2.0
+        env:
+          CIBW_BUILD: "cp314-${{ matrix.cibw-arch }}"
+          CIBW_BEFORE_ALL_LINUX: yum install -y zlib-devel libpng-devel
+          CIBW_TEST_EXTRAS: test
+          CIBW_TEST_COMMAND: pytest {project}/aicspylibczi/tests
+          CIBW_ARCHS_MACOS: x86_64 arm64
+          CMAKE_OSX_ARCHITECTURES: ${{ matrix.cibw-arch == 'macosx_x86_64' && 'x86_64' || matrix.cibw-arch == 'macosx_arm64' && 'arm64' || '' }}
+
+      - name: Upload wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-wheels-py314-${{ matrix.cibw-arch }}
+          path: wheelhouse/*.whl
