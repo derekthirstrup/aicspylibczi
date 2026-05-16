@@ -43,10 +43,12 @@ jobs:
           uv pip install --python .venv/bin/python build setuptools wheel cmake numpy
           .venv/bin/python -m build --wheel --outdir dist
 
-      - name: Smoke test wheel
+      - name: Smoke test wheel (isolated)
         run: |
-          uv pip install --python .venv/bin/python dist/*.whl
-          .venv/bin/python -c "import _aicspylibczi; print(_aicspylibczi.__doc__)"
+          uv venv --python="$PYTHON_VERSION" .smoke-venv
+          uv pip install --python .smoke-venv/bin/python dist/*.whl
+          cd "$RUNNER_TEMP"
+          "$GITHUB_WORKSPACE/.smoke-venv/bin/python" -I -c "import _aicspylibczi; print(_aicspylibczi.__doc__)"
 
       - name: Upload wheel artifact
         uses: actions/upload-artifact@v4
@@ -87,12 +89,15 @@ jobs:
           uv pip install --python .venv\Scripts\python.exe build setuptools wheel cmake numpy
           .venv\Scripts\python.exe -m build --wheel --outdir dist
 
-      - name: Smoke test wheel
+      - name: Smoke test wheel (isolated)
         shell: pwsh
         run: |
           $wheel = (Get-ChildItem dist\*.whl)[0].FullName
-          uv pip install --python .venv\Scripts\python.exe "$wheel"
-          .venv\Scripts\python.exe -c "import _aicspylibczi; print(_aicspylibczi.__doc__)"
+          uv venv --python="$env:PYTHON_VERSION" .smoke-venv
+          uv pip install --python .smoke-venv\Scripts\python.exe "$wheel"
+          Push-Location $env:RUNNER_TEMP
+          & "$env:GITHUB_WORKSPACE\.smoke-venv\Scripts\python.exe" -I -c "import _aicspylibczi; print(_aicspylibczi.__doc__)"
+          Pop-Location
 
       - name: Upload wheel artifact
         uses: actions/upload-artifact@v4
@@ -135,10 +140,12 @@ jobs:
           uv pip install --python .venv/bin/python build setuptools wheel cmake numpy
           .venv/bin/python -m build --wheel --outdir dist
 
-      - name: Smoke test wheel
+      - name: Smoke test wheel (isolated)
         run: |
-          uv pip install --python .venv/bin/python dist/*.whl
-          .venv/bin/python -c "import _aicspylibczi; print(_aicspylibczi.__doc__)"
+          uv venv --python="$PYTHON_VERSION" .smoke-venv
+          uv pip install --python .smoke-venv/bin/python dist/*.whl
+          cd "$RUNNER_TEMP"
+          "$GITHUB_WORKSPACE/.smoke-venv/bin/python" -I -c "import _aicspylibczi; print(_aicspylibczi.__doc__)"
 
       - name: Upload wheel artifact
         uses: actions/upload-artifact@v4
