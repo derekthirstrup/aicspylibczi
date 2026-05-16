@@ -1,44 +1,103 @@
-name: Python 3.14 Wheels
+name: Build Python 3.14 Wheels
 
 on:
-  push:
-    branches:
-      - claude/add-py314-wheel-action-bk4kb
   workflow_dispatch:
 
-jobs:
-  build_wheels_py314:
-    name: Build cp314 wheel on ${{ matrix.cibw-arch }}
-    runs-on: ${{ matrix.runs-on }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - runs-on: ubuntu-latest
-            cibw-arch: manylinux_x86_64
-          - runs-on: macos-13
-            cibw-arch: macosx_x86_64
-          - runs-on: macos-latest
-            cibw-arch: macosx_arm64
-          - runs-on: windows-latest
-            cibw-arch: win_amd64
+permissions: {}
 
+env:
+  PYTHON_VERSION: "cpython-3.14"
+
+jobs:
+  build-linux:
+    name: Build Linux x86_64 wheel
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: true
 
-      - uses: pypa/cibuildwheel@v3.2.0
-        env:
-          CIBW_BUILD: "cp314-${{ matrix.cibw-arch }}"
-          CIBW_BEFORE_ALL_LINUX: yum install -y zlib-devel libpng-devel
-          CIBW_TEST_EXTRAS: test
-          CIBW_TEST_COMMAND: pytest {project}/aicspylibczi/tests
-          CIBW_ARCHS_MACOS: x86_64 arm64
-          CMAKE_OSX_ARCHITECTURES: ${{ matrix.cibw-arch == 'macosx_x86_64' && 'x86_64' || matrix.cibw-arch == 'macosx_arm64' && 'arm64' || '' }}
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
 
-      - name: Upload wheels
+      - name: Install Python 3.14
+        run: uv python install "$PYTHON_VERSION"
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake g++ zlib1g-dev libpng-dev
+
+      - name: Build wheel
+        run: |
+          uv venv --python="$PYTHON_VERSION" .venv
+          uv pip install --python .venv/bin/python build setuptools wheel cmake numpy
+          .venv/bin/python -m build --wheel --outdir dist
+
+      - name: Upload wheel artifact
         uses: actions/upload-artifact@v4
         with:
-          name: build-wheels-py314-${{ matrix.cibw-arch }}
-          path: wheelhouse/*.whl
+          name: aicspylibczi-linux-cp314-wheel
+          path: dist/*.whl
+
+  build-windows:
+    name: Build Windows x64 wheel
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: true
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Install Python 3.14
+        run: uv python install "$env:PYTHON_VERSION"
+
+      - name: Build wheel
+        shell: pwsh
+        run: |
+          uv venv --python="$env:PYTHON_VERSION" .venv
+          uv pip install --python .venv\Scripts\python.exe build setuptools wheel cmake numpy
+          .venv\Scripts\python.exe -m build --wheel --outdir dist
+
+      - name: Upload wheel artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: aicspylibczi-windows-cp314-wheel
+          path: dist/*.whl
+
+  build-macos:
+    name: Build macOS arm64 wheel
+    runs-on: macos-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: true
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Install Python 3.14
+        run: uv python install "$PYTHON_VERSION"
+
+      - name: Install build dependencies
+        run: brew install cmake libpng
+
+      - name: Build wheel
+        run: |
+          uv venv --python="$PYTHON_VERSION" .venv
+          uv pip install --python .venv/bin/python build setuptools wheel cmake numpy
+          .venv/bin/python -m build --wheel --outdir dist
+
+      - name: Upload wheel artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: aicspylibczi-macos-cp314-wheel
+          path: dist/*.whl
