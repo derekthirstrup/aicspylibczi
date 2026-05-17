@@ -49,6 +49,13 @@ jobs:
           uv pip install --python .venv/bin/python build setuptools wheel cmake
           .venv/bin/python -m build --wheel --outdir dist
 
+      - name: Repair wheel for manylinux
+        run: |
+          uv pip install --python .venv/bin/python auditwheel
+          .venv/bin/python -m auditwheel repair dist/*.whl -w repaired
+          rm dist/*.whl
+          mv repaired/*.whl dist/
+
       - name: Smoke test wheel (isolated)
         run: |
           uv venv --python="$PYTHON_VERSION" .smoke-venv
@@ -161,3 +168,34 @@ jobs:
           name: aicspylibczi-macos-${{ matrix.tag }}-wheel
           path: dist/*.whl
           if-no-files-found: error
+
+  publish-release:
+    name: Publish wheels to GitHub Release
+    needs: [build-linux, build-windows, build-macos]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all wheel artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: wheels
+          pattern: aicspylibczi-*-wheel
+          merge-multiple: true
+
+      - name: Create or update release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v3.3.1+py314
+          name: aicspylibczi 3.3.1+py314.fork
+          body: |
+            Unofficial Python 3.14 wheels (including cp314t free-threaded)
+            built from this fork. Not published to PyPI.
+
+            Install with pip:
+
+                pip install --find-links \
+                  https://github.com/derekthirstrup/aicspylibczi/releases/expanded_assets/v3.3.1+py314 \
+                  aicspylibczi==3.3.1+py314.fork
+          files: wheels/*.whl
+          fail_on_unmatched_files: true

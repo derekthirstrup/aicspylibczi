@@ -124,7 +124,7 @@ setup(
     name="aicspylibczi",
     # Do not edit this string manually, always use bumpversion
     # Details in CONTRIBUTING.md
-    version="3.3.1",
+    version="3.3.1+py314.fork",
     author="Jamie Sherman, Paul Watkins",
     author_email="jamies@alleninstitute.org, pwatkins@gmail.com",
     description="A python module and a python extension for Zeiss (CZI/ZISRAW) microscopy files.",
