@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import platform
 import re
+import shlex
 import subprocess
 import sys
 from distutils.version import LooseVersion
@@ -84,7 +85,9 @@ class CMakeBuild(build_ext):
         cmake_args = [
             "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=" + extdir,
             "-DPYTHON_EXECUTABLE=" + sys.executable,
+            "-DPython_EXECUTABLE=" + sys.executable,
         ]
+        cmake_args += shlex.split(os.environ.get("AICSPYLIBCZI_CMAKE_ARGS", ""))
 
         cfg = "Debug" if self.debug else "Release"
         build_args = ["--config", cfg]

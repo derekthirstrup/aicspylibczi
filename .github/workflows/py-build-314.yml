@@ -8,6 +8,9 @@ on:
 
 permissions: {}
 
+env:
+  AICSPYLIBCZI_CMAKE_ARGS: "-DPYBIND11_FINDPYTHON=ON"
+
 jobs:
   build-linux:
     name: Build Linux x86_64 ${{ matrix.tag }} wheel
