@@ -87,7 +87,10 @@ class CMakeBuild(build_ext):
             "-DPYTHON_EXECUTABLE=" + sys.executable,
             "-DPython_EXECUTABLE=" + sys.executable,
         ]
-        cmake_args += shlex.split(os.environ.get("AICSPYLIBCZI_CMAKE_ARGS", ""))
+        cmake_args += shlex.split(
+            os.environ.get("AICSPYLIBCZI_CMAKE_ARGS", ""),
+            posix=(os.name != "nt"),
+        )
 
         cfg = "Debug" if self.debug else "Release"
         build_args = ["--config", cfg]
