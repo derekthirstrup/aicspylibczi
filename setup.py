@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import platform
 import re
+import shlex
 import subprocess
 import sys
 from distutils.version import LooseVersion
@@ -84,7 +85,12 @@ class CMakeBuild(build_ext):
         cmake_args = [
             "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=" + extdir,
             "-DPYTHON_EXECUTABLE=" + sys.executable,
+            "-DPython_EXECUTABLE=" + sys.executable,
         ]
+        cmake_args += shlex.split(
+            os.environ.get("AICSPYLIBCZI_CMAKE_ARGS", ""),
+            posix=(os.name != "nt"),
+        )
 
         cfg = "Debug" if self.debug else "Release"
         build_args = ["--config", cfg]
@@ -118,7 +124,7 @@ setup(
     name="aicspylibczi",
     # Do not edit this string manually, always use bumpversion
     # Details in CONTRIBUTING.md
-    version="3.3.1",
+    version="3.3.1+py314.fork",
     author="Jamie Sherman, Paul Watkins",
     author_email="jamies@alleninstitute.org, pwatkins@gmail.com",
     description="A python module and a python extension for Zeiss (CZI/ZISRAW) microscopy files.",

@@ -13,7 +13,7 @@
 #include "pb_caster_SubblockMetaVec.h"
 #include "pb_caster_libCZI_DimensionIndex.h"
 
-PYBIND11_MODULE(_aicspylibczi, m)
+PYBIND11_MODULE(_aicspylibczi, m, pybind11::mod_gil_not_used())
 {
 
   namespace py = pybind11;
