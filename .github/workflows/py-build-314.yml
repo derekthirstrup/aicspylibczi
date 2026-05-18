@@ -2,8 +2,8 @@ name: Build Python 3.14 Wheels
 
 on:
   push:
-    branches:
-      - claude/add-py314-wheel-action-bk4kb
+    tags:
+      - "v*"
   workflow_dispatch:
 
 permissions: {}
